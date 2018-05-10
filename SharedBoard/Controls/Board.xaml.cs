@@ -21,6 +21,8 @@ namespace SharedBoard.Controls
     {
         private ScrollViewer scrollViewer;
 
+        private IBoardControl selectedControl;
+
         private readonly List<IBoardControl> boardControls = new List<IBoardControl>();
 
         public Rect Bounds => new Rect(0, 0, ActualWidth, ActualHeight);
@@ -40,9 +42,39 @@ namespace SharedBoard.Controls
             }
         }
 
+        public IBoardControl SelectedControl
+        {
+            get
+            {
+                return selectedControl;
+            }
+
+            set
+            {
+                if (selectedControl != value)
+                {
+                    if (selectedControl != null)
+                        selectedControl.Selected = false;
+
+                    selectedControl = value;
+                }
+
+                if (selectedControl != null)
+                {
+                    selectedControl.Selected = true;
+                    selectedControlTools.Show(selectedControl, (Control) selectedControl);
+                }
+                else
+                {
+                    selectedControlTools.Hide();
+                }
+            }
+        }
+
         public Board()
         {
             this.InitializeComponent();
+            selectedControlTools.Board = this;
         }
 
         public StickyNote AddStickyNote(Point position)
@@ -96,17 +128,30 @@ namespace SharedBoard.Controls
             Canvas.SetZIndex(control, index);
         }
 
-        private void UserControl_Tapped(object sender, TappedRoutedEventArgs e)
+        public void RemoveControl(IBoardControl boardControl)
         {
-            StopAllEdits();
+            if (boardControl == selectedControl)
+            {
+                SelectedControl = null;
+            }
+
+            boardControl.StopEdit();
+            boardControls.Remove(boardControl);
+            mainCanvas.Children.Remove((Control)boardControl);
         }
 
-        private void StopAllEdits()
+        public void StopAllEdits()
         {
             boardControls.ForEach(x => x.StopEdit());
         }
+        
+        private void Board_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            StopAllEdits();
+            SelectedControl = null;
+        }
 
-        private void UserControl_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        private void Board_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
             var pos = e.GetPosition(mainCanvas);
             pos.X -= StickyNote.DefaultSize.Width / 2;

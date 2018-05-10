@@ -99,6 +99,9 @@
       <DependentUpon>Board.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\IBoardControl.cs" />
+    <Compile Include="Controls\SelectedControlTools.xaml.cs">
+      <DependentUpon>SelectedControlTools.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -129,6 +132,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="Controls\Board.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SelectedControlTools.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
