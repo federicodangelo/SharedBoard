@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedBoard.Controls;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,21 @@ namespace SharedBoard
         public MainPage()
         {
             this.InitializeComponent();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var stickyNote = new StickyNote();
+
+            //stickyNote.Margin = new Thickness(100, 100, Double.NaN, Double.NaN);
+
+            Canvas.SetLeft(stickyNote, 100);
+            Canvas.SetTop(stickyNote, 100);
+
+
+
+
+            mainCanvas.Children.Add(stickyNote);
         }
     }
 }
