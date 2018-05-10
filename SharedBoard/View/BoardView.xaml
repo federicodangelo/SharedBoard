@@ -8,9 +8,11 @@
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400"
-    DoubleTapped="Board_DoubleTapped"
     Tapped="Board_Tapped"
+    DoubleTapped="Board_DoubleTapped"
+    LayoutUpdated="Board_LayoutUpdated" 
     >
+
     <Canvas Background="#FFD4F7F5" x:Name="mainCanvas">
         <local:SelectedControlToolsView Visibility="Collapsed" x:Name="selectedControlTools"/>
     </Canvas>

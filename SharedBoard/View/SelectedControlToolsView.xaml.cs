@@ -20,30 +20,42 @@ namespace SharedBoard.View
     public sealed partial class SelectedControlToolsView : UserControl
     {
         private BoardView board;
-        private IBoardControlView boardControl;
+        private IBoardControlView boardControlView;
         private long topPropertyChangedToken;
         private long leftPropertyChangedToken;
-
-        public BoardView Board { set => board = value; }
+        
+        public BoardView Board { set => board = value; get => board; }
 
         public SelectedControlToolsView()
         {
             this.InitializeComponent();
         }
 
-        public void Show(IBoardControlView boardControl)
+        public void Show(IBoardControlView boardControlView)
         {
             Hide();
 
-            this.boardControl = boardControl;
+            this.boardControlView = boardControlView;
 
             Visibility = Visibility.Visible;
 
             UpdatePosition();
 
-            boardControl.Control.SizeChanged += BoardControl_SizeChanged;
-            topPropertyChangedToken = boardControl.Control.RegisterPropertyChangedCallback(Canvas.TopProperty, (a, b) => UpdatePosition());
-            leftPropertyChangedToken = boardControl.Control.RegisterPropertyChangedCallback(Canvas.LeftProperty, (a, b) => UpdatePosition());
+            RegisterCallbacks();
+        }
+
+        private void RegisterCallbacks()
+        {
+            boardControlView.Control.SizeChanged += BoardControl_SizeChanged;
+            topPropertyChangedToken = boardControlView.Control.RegisterPropertyChangedCallback(Canvas.TopProperty, (a, b) => UpdatePosition());
+            leftPropertyChangedToken = boardControlView.Control.RegisterPropertyChangedCallback(Canvas.LeftProperty, (a, b) => UpdatePosition());
+        }
+
+        private void UnregisterCallbacks()
+        {
+            boardControlView.Control.UnregisterPropertyChangedCallback(Canvas.TopProperty, topPropertyChangedToken);
+            boardControlView.Control.UnregisterPropertyChangedCallback(Canvas.LeftProperty, leftPropertyChangedToken);
+            boardControlView.Control.SizeChanged -= BoardControl_SizeChanged;
         }
 
         private void BoardControl_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -53,7 +65,7 @@ namespace SharedBoard.View
 
         private void UpdatePosition()
         {
-            var boardControlBounds = boardControl.Bounds;
+            var boardControlBounds = boardControlView.VisibleBounds;
 
             Canvas.SetTop(this, boardControlBounds.Top - 2);
             Canvas.SetLeft(this, boardControlBounds.Left - 2);
@@ -65,24 +77,15 @@ namespace SharedBoard.View
         {
             Visibility = Visibility.Collapsed;
 
-            if (boardControl != null)
-            {
-                boardControl.Control.UnregisterPropertyChangedCallback(Canvas.TopProperty, topPropertyChangedToken);
-                boardControl.Control.UnregisterPropertyChangedCallback(Canvas.LeftProperty, leftPropertyChangedToken);
-                boardControl.Control.SizeChanged -= BoardControl_SizeChanged;
-            }
+            if (boardControlView != null)
+                UnregisterCallbacks();
 
-            boardControl = null;
-        }
-
-        private void OnDeleteButtonClick(object sender, RoutedEventArgs e)
-        {
-            board.RemoveBoardControlView(boardControl);
+            boardControlView = null;
         }
 
         private void OnEditButtonClick(object sender, RoutedEventArgs e)
         {
-            boardControl.StartEdit();
+            boardControlView.StartEdit();
         }
 
         private void Button_Tapped(object sender, TappedRoutedEventArgs e)

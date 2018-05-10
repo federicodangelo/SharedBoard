@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using SharedBoard.Model;
+using SharedBoard.ViewModel;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -20,23 +21,13 @@ namespace SharedBoard.View
 {
     public sealed partial class StickyNoteView : UserControl, IBoardControlView
     {
-        public static readonly Size DefaultSize = new Size(300, 300);
+        public BoardView BoardView { get; private set; }
 
-        private BoardView boardView;
-        private BoardControl boardControl;
+        public BoardControlViewModel BoardControlViewModel { get; private set; }
 
-        public BoardView BoardView { get => boardView; set => boardView = value; }
+        public StickyNoteViewModel StickyNoteViewModel => BoardControlViewModel as StickyNoteViewModel;
 
-        public BoardControl BoardControl => boardControl;
-
-        public Rect Bounds
-        {
-            get
-            {
-                var pos = boardView.GetBoardControlViewPosition(this);
-                return new Rect(pos.X, pos.Y, ActualWidth, ActualHeight);
-            }
-        }
+        public Rect VisibleBounds => new Rect(Canvas.GetLeft(this), Canvas.GetTop(this), ActualWidth, ActualHeight);
 
         public bool CanBeMoved => !IsEditing;
 
@@ -53,13 +44,10 @@ namespace SharedBoard.View
             textBox.Visibility = Visibility.Collapsed;
         }
 
-
-        public void Init(BoardView boardView, BoardControl boardControl)
+        public void Init(BoardView boardView, BoardControlViewModel boardControlViewModel)
         {
-            this.boardView = boardView;
-            this.boardControl = boardControl;
-            textBox.Text = ((StickyNote)boardControl).Text;
-            textBlock.Text = ((StickyNote)boardControl).Text;
+            BoardView = boardView;
+            BoardControlViewModel = boardControlViewModel;
         }
 
         public void StartEdit()
@@ -72,7 +60,7 @@ namespace SharedBoard.View
             if (IsEditing)
                 return;
 
-            boardView.SelectedBoardControlView = this;
+            BoardView.ViewModel.SelectedBoardControlViewModel = BoardControlViewModel;
 
             textBlock.Visibility = Visibility.Collapsed;
             textBox.Visibility = Visibility.Visible;
@@ -89,16 +77,13 @@ namespace SharedBoard.View
 
             textBox.Visibility = Visibility.Collapsed;
             textBlock.Visibility = Visibility.Visible;
-            textBlock.Text = textBox.Text;
-
-            ((StickyNote)boardControl).Text = textBox.Text;
         }
 
         private void StickyNote_Tapped(object sender, TappedRoutedEventArgs e)
         {
             e.Handled = true;
-            boardView.SetTopBoardControlView(this);
-            boardView.SelectedBoardControlView = this;
+            BoardView.SetTopBoardControlView(this);
+            BoardView.ViewModel.SelectedBoardControlViewModel = BoardControlViewModel;
         }
 
         private void StickyNote_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
@@ -112,11 +97,10 @@ namespace SharedBoard.View
             StopEdit();
         }
 
-
         private void StickyNote_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
         {
-            boardView.SetTopBoardControlView(this);
-            boardView.SelectedBoardControlView = this;
+            BoardView.SetTopBoardControlView(this);
+            BoardView.ViewModel.SelectedBoardControlViewModel = BoardControlViewModel;
         }
 
         private void StickyNote_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
@@ -124,13 +108,13 @@ namespace SharedBoard.View
             if (!CanBeMoved)
                 return;
 
-            var boardBounds = boardView.Bounds;
-            var bounds = Bounds;
+            var boardBounds = BoardView.Bounds;
+            var bounds = VisibleBounds;
 
             var delta = e.Delta.Translation;
 
-            delta.X /= boardView.ZoomFactor;
-            delta.Y /= boardView.ZoomFactor;
+            delta.X /= BoardView.ZoomFactor;
+            delta.Y /= BoardView.ZoomFactor;
 
             if (bounds.Right + delta.X > boardBounds.Right)
                 delta.X = boardBounds.Right - bounds.Right;
@@ -144,7 +128,8 @@ namespace SharedBoard.View
             if (bounds.Top < boardBounds.Top)
                 delta.Y = boardBounds.Top - bounds.Top;
 
-            boardView.MoveBoardControlView(this, new Point(bounds.Left + delta.X, bounds.Top + delta.Y));
+            BoardControlViewModel.X = bounds.Left + delta.X;
+            BoardControlViewModel.Y = bounds.Top + delta.Y;
         }
     }
 }

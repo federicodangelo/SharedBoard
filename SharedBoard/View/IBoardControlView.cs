@@ -1,4 +1,5 @@
 ﻿using SharedBoard.Model;
+using SharedBoard.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,15 +12,15 @@ namespace SharedBoard.View
 {
     public interface IBoardControlView
     {
-        void Init(BoardView boardView, BoardControl boardControl);
+        void Init(BoardView boardView, BoardControlViewModel boardControlViewModel);
 
         BoardView BoardView { get; }
 
-        BoardControl BoardControl { get; }
+        BoardControlViewModel BoardControlViewModel { get; }
 
         Control Control { get; }
 
-        Rect Bounds { get; }
+        Rect VisibleBounds { get; }
 
         bool Selected { get; set; }
 

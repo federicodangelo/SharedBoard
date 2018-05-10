@@ -1,4 +1,5 @@
 ﻿using SharedBoard.Model;
+using SharedBoard.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,59 +46,69 @@ namespace SharedBoard.View
             }
         }
 
-        public IBoardControlView SelectedBoardControlView
-        {
-            get
-            {
-                return selectedControlView;
-            }
-
-            set
-            {
-                if (selectedControlView != value)
-                {
-                    if (selectedControlView != null)
-                        selectedControlView.Selected = false;
-
-                    selectedControlView = value;
-                }
-
-                if (selectedControlView != null)
-                {
-                    selectedControlView.Selected = true;
-                    selectedControlTools.Show(selectedControlView);
-                    var maxZIndex = boardControlViews.Aggregate(0, (acc, bc) => Math.Max(acc, Canvas.GetZIndex(bc.Control)));
-                    Canvas.SetZIndex(selectedControlTools, maxZIndex + 1);
-                }
-                else
-                {
-                    selectedControlTools.Hide();
-                }
-            }
-        }
-
+        public BoardViewModel ViewModel { get; private set; }
+        
         public BoardView()
         {
             this.InitializeComponent();
-            selectedControlTools.Board = this;
+
+            ViewModel = new BoardViewModel(new Board());
+
+            InitManualBindings();
         }
 
-        public StickyNoteView AddStickyNote(Point position)
+        private void InitManualBindings()
         {
-            var stickyNote = new StickyNote
+            selectedControlTools.Board = this;
+
+            //HORRIBLE HACK.. no econtre forma sencilla de hacer este binding, porque para hacer la conversion entre BoardControl y IBoardControlView necesito
+            //que el conversor tenga acceso a la lista de boardControlViews, y cuando intente hacerlo con este binding:
+            //< local:BoardView SelectedBoardControlView = "{x:Bind ViewModel.SelectedBoardControl, Mode=OneWay, Converter={StaticResource BoardControlConverter}, ConverterParameter={x:Bind BoardControlViews} }" />
+            //no compilaba porque no le gustaba el parametro del converter...
+            ViewModel.PropertyChanged += (sender, e) =>
             {
-                Position = position,
-                Size = StickyNoteView.DefaultSize
+                if (e.PropertyName == nameof(ViewModel.SelectedBoardControlViewModel))
+                    SetSelectedBoardControlView(FindBoardBoardView(ViewModel.SelectedBoardControlViewModel));
             };
 
-            return AddStickyNote(stickyNote);
+            ViewModel.BoardControls.CollectionChanged += BoardControls_CollectionChanged;
         }
 
-        public StickyNoteView AddStickyNote(StickyNote stickyNote)
+        private void BoardControls_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (var item in e.NewItems)
+                {
+                    if (item is StickyNoteViewModel)
+                    {
+                        AddStickyNote(item as StickyNoteViewModel);
+                    }
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (var item in e.OldItems)
+                {
+                    if (item is BoardControlViewModel)
+                    {
+                        RemoveBoardControlView(FindBoardBoardView(item as BoardControlViewModel));
+                    }
+                }
+            }
+        }
+
+        private IBoardControlView FindBoardBoardView(BoardControlViewModel boardControlViewModel)
+        {
+            return boardControlViews.Find(x => x.BoardControlViewModel == boardControlViewModel);
+        }
+        
+        private StickyNoteView AddStickyNote(StickyNoteViewModel stickyNoteViewModel)
         {
             var stickyNoteView = new StickyNoteView();
 
-            InitBoardControlView(stickyNoteView, stickyNote);
+            InitBoardControlView(stickyNoteView, stickyNoteViewModel);
 
             AddBoardControlView(stickyNoteView);
 
@@ -106,34 +117,16 @@ namespace SharedBoard.View
             return stickyNoteView;
         }
 
-        private void InitBoardControlView(IBoardControlView boardControlView, BoardControl boardControl)
+        private void InitBoardControlView(IBoardControlView boardControlView, BoardControlViewModel boardControlViewModel)
         {
-            Canvas.SetLeft(boardControlView.Control, boardControl.Position.X);
-            Canvas.SetTop(boardControlView.Control, boardControl.Position.Y);
-            boardControlView.Control.Width = boardControl.Size.Width;
-            boardControlView.Control.Height = boardControl.Size.Height;
-
-            boardControlView.Init(this, boardControl);
+            boardControlView.Init(this, boardControlViewModel);
         }
 
-        public void AddBoardControlView(IBoardControlView boardControlView)
+        private void AddBoardControlView(IBoardControlView boardControlView)
         {
-            board.AddBoardControl(boardControlView.BoardControl);
-
             mainCanvas.Children.Add(boardControlView.Control);
 
             boardControlViews.Add(boardControlView);
-        }
-
-        public Point GetBoardControlViewPosition(IBoardControlView boardControlView)
-        {
-            return new Point(Canvas.GetLeft(boardControlView.Control), Canvas.GetTop(boardControlView.Control));
-        }
-
-        public void MoveBoardControlView(IBoardControlView boardControlView, Point position)
-        {
-            Canvas.SetLeft(boardControlView.Control, position.X);
-            Canvas.SetTop(boardControlView.Control, position.Y);
         }
 
         public void SetTopBoardControlView(IBoardControlView boardControlView)
@@ -144,38 +137,68 @@ namespace SharedBoard.View
             Canvas.SetZIndex(selectedControlTools, maxZIndex + 2);
         }
 
-        public void RemoveBoardControlView(IBoardControlView boardControlView)
+        private void RemoveBoardControlView(IBoardControlView boardControlView)
         {
+            if (boardControlView == null)
+                return;
+
             if (boardControlView == selectedControlView)
             {
-                SelectedBoardControlView = null;
+                SetSelectedBoardControlView(null);
             }
 
             boardControlView.StopEdit();
             boardControlViews.Remove(boardControlView);
             mainCanvas.Children.Remove(boardControlView.Control);
-
-            board.RemoveBoardControl(boardControlView.BoardControl);
         }
 
         public void StopAllEdits()
         {
             boardControlViews.ForEach(x => x.StopEdit());
         }
-        
+
+        private void SetSelectedBoardControlView(IBoardControlView value)
+        {
+            if (selectedControlView != value)
+            {
+                if (selectedControlView != null)
+                    selectedControlView.Selected = false;
+
+                selectedControlView = value;
+            }
+
+            if (selectedControlView != null)
+            {
+                selectedControlView.Selected = true;
+                selectedControlTools.Show(selectedControlView);
+                var maxZIndex = boardControlViews.Aggregate(0, (acc, bc) => Math.Max(acc, Canvas.GetZIndex(bc.Control)));
+                Canvas.SetZIndex(selectedControlTools, maxZIndex + 1);
+            }
+            else
+            {
+                selectedControlTools.Hide();
+            }
+        }
+
         private void Board_Tapped(object sender, TappedRoutedEventArgs e)
         {
             StopAllEdits();
-            SelectedBoardControlView = null;
+            ViewModel.LastPointerPosition = e.GetPosition(mainCanvas);
+            ViewModel.SelectedBoardControlViewModel = null;
         }
 
         private void Board_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
             var pos = e.GetPosition(mainCanvas);
-            pos.X -= StickyNoteView.DefaultSize.Width / 2;
-            pos.Y -= StickyNoteView.DefaultSize.Height / 2;
+            ViewModel.LastPointerPosition = pos;
+            var cmd = ViewModel.CreateAddStickyNoteCommand;
+            if (cmd.CanExecute(null))
+                cmd.Execute(null);
+        }
 
-            AddStickyNote(pos).StartEdit(true);
+        private void Board_LayoutUpdated(object sender, object e)
+        {
+            ViewModel.VisibleCenter = VisibleCenter;
         }
     }
 }

@@ -23,7 +23,7 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <Button Content="X" Click="OnDeleteButtonClick" Width="40" Height="40" Grid.Column="0" Margin="5" Tapped="Button_Tapped" DoubleTapped="Button_DoubleTapped" />
+                    <Button Content="X" Command="{x:Bind Board.ViewModel.CreateRemoveSelectedStickyNoteCommand}" Width="40" Height="40" Grid.Column="0" Margin="5" Tapped="Button_Tapped" DoubleTapped="Button_DoubleTapped" />
                     <Button Content="..." Click="OnEditButtonClick" Width="40" Height="40" Grid.Column="1" Margin="5" Tapped="Button_Tapped" DoubleTapped="Button_DoubleTapped" />
                     <!--
                     <Button Content="X" Click="OnDeleteButtonClick" Width="40" Height="40" Grid.Column="2" Margin="5"  />

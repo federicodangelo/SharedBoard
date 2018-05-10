@@ -26,6 +26,11 @@ namespace SharedBoard
     {
         private const float StartingZoom = 0.75f;
 
+        public BoardView Board
+        {
+            get { return board; }
+        }
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -37,12 +42,14 @@ namespace SharedBoard
             ZoomToCenter(StartingZoom);
         }
         
+        /*
         private void CreateStickyNote_Click(object sender, RoutedEventArgs e)
         {
             var scrollCenter = board.VisibleCenter;
             
             board.AddStickyNote(new Point(scrollCenter.X - StickyNoteView.DefaultSize.Width / 2, scrollCenter.Y - StickyNoteView.DefaultSize.Height / 2)).StartEdit(true);
         }
+        */
 
         private void ZoomIn_Click(object sender, RoutedEventArgs e)
         {
