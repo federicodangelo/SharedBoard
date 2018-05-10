@@ -19,26 +19,54 @@ namespace SharedBoard.Controls
 {
     public sealed partial class Board : UserControl
     {
+        private ScrollViewer scrollViewer;
+
+        private readonly List<IBoardControl> boardControls = new List<IBoardControl>();
+
+        public Rect Bounds => new Rect(0, 0, ActualWidth, ActualHeight);
+
+        public ScrollViewer ScrollViewer { get => scrollViewer; set => scrollViewer = value; }
+
+        public float ZoomFactor => scrollViewer.ZoomFactor;
+
+        public Point VisibleCenter
+        {
+            get
+            {
+                var x = Bounds.Width / 2 + (-scrollViewer.ScrollableWidth / 2 + scrollViewer.HorizontalOffset) / ZoomFactor;
+                var y = Bounds.Height / 2 + (-scrollViewer.ScrollableHeight / 2 + scrollViewer.VerticalOffset) / ZoomFactor;
+
+                return new Point(x, y);
+            }
+        }
+
         public Board()
         {
             this.InitializeComponent();
         }
 
-        public void AddStickyNote(Point position)
+        public StickyNote AddStickyNote(Point position)
         {
-            var stickyNote = new StickyNote();
-
-            stickyNote.Board = this;
+            var stickyNote = new StickyNote
+            {
+                Board = this
+            };
 
             Canvas.SetLeft(stickyNote, position.X);
             Canvas.SetTop(stickyNote, position.Y);
 
             mainCanvas.Children.Add(stickyNote);
+
+            AddBoardControl(stickyNote);
+
+            SetTopChild(stickyNote);
+
+            return stickyNote;
         }
 
-        private void UserControl_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        private void AddBoardControl(StickyNote stickyNote)
         {
-            AddStickyNote(e.GetPosition(mainCanvas));
+            boardControls.Add(stickyNote);
         }
 
         public Point GetChildPosition(Control control)
@@ -68,12 +96,23 @@ namespace SharedBoard.Controls
             Canvas.SetZIndex(control, index);
         }
 
-        public Rect Bounds
+        private void UserControl_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            get
-            {
-                return new Rect(0, 0, ActualWidth, ActualHeight);
-            }
+            StopAllEdits();
+        }
+
+        private void StopAllEdits()
+        {
+            boardControls.ForEach(x => x.StopEdit());
+        }
+
+        private void UserControl_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            var pos = e.GetPosition(mainCanvas);
+            pos.X -= StickyNote.DefaultSize.Width / 2;
+            pos.Y -= StickyNote.DefaultSize.Height / 2;
+
+            AddStickyNote(pos).StartEdit(true);
         }
     }
 }

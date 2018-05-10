@@ -8,14 +8,14 @@
     x:Class="SharedBoard.Controls.StickyNote"
     mc:Ignorable="d"
     d:DesignHeight="300"
-    d:DesignWidth="400"
+    d:DesignWidth="300"
     Tapped="StickyNote_Tapped"
     DoubleTapped="StickyNote_DoubleTapped">
 
     <Border BorderBrush="Black" BorderThickness="2" ManipulationMode="TranslateX,TranslateY" ManipulationDelta="StickyNote_ManipulationDelta" ManipulationStarted="StickyNote_ManipulationStarted">
-        <Canvas Width="400" Height="300" Background="Yellow">
-            <TextBox x:Name="textBox" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Stretch" Margin="0,0,0,0" Text="Sticky Note" VerticalAlignment="Stretch" FontSize="22" Width="400" Height="300" BorderBrush="{x:Null}" InputScope="Text" Background="{x:Null}" LostFocus="TextBox_LostFocus"/>
-            <TextBlock x:Name="textBlock" TextWrapping="Wrap" HorizontalAlignment="Stretch" Margin="12,3,0,0" Text="Sticky Note" VerticalAlignment="Stretch" FontSize="22" Height="300" Width="397"/>
+        <Canvas Width="300" Height="300" Background="Yellow">
+            <TextBox x:Name="textBox" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Stretch" Margin="0,0,0,0" Text="Sticky Note" VerticalAlignment="Stretch" FontSize="22" Width="300" Height="300" BorderBrush="{x:Null}" InputScope="Text" Background="{x:Null}" LostFocus="TextBox_LostFocus" Padding="0,0,0,0"/>
+            <TextBlock x:Name="textBlock" TextWrapping="Wrap" HorizontalAlignment="Stretch" Margin="0,0,0,0" Text="Sticky Note" VerticalAlignment="Stretch" FontSize="22" Height="300" Width="300" Padding="2,1,0,0"/>
         </Canvas>
     </Border>
 </UserControl>

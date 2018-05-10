@@ -8,9 +8,9 @@
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400"
+    DoubleTapped="UserControl_DoubleTapped"
+    Tapped="UserControl_Tapped"
     >
-    <Canvas>
-        <Canvas x:Name="mainCanvas" DoubleTapped="UserControl_DoubleTapped">
-        </Canvas>
+    <Canvas Background="#FFD4F7F5" x:Name="mainCanvas">
     </Canvas>
 </UserControl>

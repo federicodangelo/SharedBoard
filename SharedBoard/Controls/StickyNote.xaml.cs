@@ -17,19 +17,26 @@ using Windows.UI.Xaml.Navigation;
 
 namespace SharedBoard.Controls
 {
-    public sealed partial class StickyNote : UserControl
+    public sealed partial class StickyNote : UserControl, IBoardControl
     {
+        public static readonly Size DefaultSize = new Size(300, 300);
+
         private Board board;
 
         public Board Board { get => board; set => board = value; }
 
-        public Rect Bounds {
+        public Rect Bounds
+        {
             get
             {
                 var pos = board.GetChildPosition(this);
                 return new Rect(pos.X, pos.Y, ActualWidth, ActualHeight);
             }
         }
+
+        public bool CanBeMoved => textBlock.Visibility == Visibility.Visible;
+
+        public bool IsEditing => textBox.Visibility == Visibility.Visible;
 
         public StickyNote()
         {
@@ -41,25 +48,26 @@ namespace SharedBoard.Controls
         private void StickyNote_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
             e.Handled = true;
-            textBlock.Visibility = Visibility.Collapsed;
-            textBox.Visibility = Visibility.Visible;
-            textBox.Focus(FocusState.Pointer);
+            StartEdit();
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            textBox.Visibility = Visibility.Collapsed;
-            textBlock.Visibility = Visibility.Visible;
-            textBlock.Text = textBox.Text;
+            StopEdit();
         }
-
 
         private void StickyNote_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
         {
+            if (!CanBeMoved)
+                return;
+
             var boardBounds = board.Bounds;
             var bounds = Bounds;
 
             var delta = e.Delta.Translation;
+
+            delta.X /= board.ZoomFactor;
+            delta.Y /= board.ZoomFactor;
 
             if (bounds.Right + delta.X > boardBounds.Right)
                 delta.X = boardBounds.Right - bounds.Right;
@@ -76,6 +84,34 @@ namespace SharedBoard.Controls
             board.MoveChildTo(this, new Point(bounds.Left + delta.X, bounds.Top + delta.Y));
         }
 
+        public void StartEdit()
+        {
+            StartEdit(false);
+        }
+
+        public void StartEdit(bool selectAllText)
+        {
+            if (IsEditing)
+                return;
+
+            textBlock.Visibility = Visibility.Collapsed;
+            textBox.Visibility = Visibility.Visible;
+            textBox.Focus(FocusState.Pointer);
+
+            if (selectAllText)
+                textBox.SelectAll();
+        }
+        
+        public void StopEdit()
+        {
+            if (!IsEditing)
+                return;
+
+            textBox.Visibility = Visibility.Collapsed;
+            textBlock.Visibility = Visibility.Visible;
+            textBlock.Text = textBox.Text;
+        }
+
         private void StickyNote_Tapped(object sender, TappedRoutedEventArgs e)
         {
             board.SetTopChild(this);
@@ -85,5 +121,6 @@ namespace SharedBoard.Controls
         {
             board.SetTopChild(this);
         }
+
     }
 }
