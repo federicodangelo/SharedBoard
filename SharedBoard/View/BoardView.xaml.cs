@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharedBoard.Model;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,9 +22,11 @@ namespace SharedBoard.View
     {
         private ScrollViewer scrollViewer;
 
-        private IBoardControlView selectedControl;
+        private IBoardControlView selectedControlView;
 
-        private readonly List<IBoardControlView> boardControls = new List<IBoardControlView>();
+        private Board board = new Board();
+
+        private readonly List<IBoardControlView> boardControlViews = new List<IBoardControlView>();
 
         public Rect Bounds => new Rect(0, 0, ActualWidth, ActualHeight);
 
@@ -42,27 +45,29 @@ namespace SharedBoard.View
             }
         }
 
-        public IBoardControlView SelectedControl
+        public IBoardControlView SelectedBoardControlView
         {
             get
             {
-                return selectedControl;
+                return selectedControlView;
             }
 
             set
             {
-                if (selectedControl != value)
+                if (selectedControlView != value)
                 {
-                    if (selectedControl != null)
-                        selectedControl.Selected = false;
+                    if (selectedControlView != null)
+                        selectedControlView.Selected = false;
 
-                    selectedControl = value;
+                    selectedControlView = value;
                 }
 
-                if (selectedControl != null)
+                if (selectedControlView != null)
                 {
-                    selectedControl.Selected = true;
-                    selectedControlTools.Show(selectedControl, (Control) selectedControl);
+                    selectedControlView.Selected = true;
+                    selectedControlTools.Show(selectedControlView);
+                    var maxZIndex = boardControlViews.Aggregate(0, (acc, bc) => Math.Max(acc, Canvas.GetZIndex(bc.Control)));
+                    Canvas.SetZIndex(selectedControlTools, maxZIndex + 1);
                 }
                 else
                 {
@@ -79,76 +84,89 @@ namespace SharedBoard.View
 
         public StickyNoteView AddStickyNote(Point position)
         {
-            var stickyNote = new StickyNoteView
+            var stickyNote = new StickyNote
             {
-                Board = this
+                Position = position,
+                Size = StickyNoteView.DefaultSize
             };
 
-            Canvas.SetLeft(stickyNote, position.X);
-            Canvas.SetTop(stickyNote, position.Y);
-
-            mainCanvas.Children.Add(stickyNote);
-
-            AddBoardControl(stickyNote);
-
-            SetTopChild(stickyNote);
-
-            return stickyNote;
+            return AddStickyNote(stickyNote);
         }
 
-        private void AddBoardControl(StickyNoteView stickyNote)
+        public StickyNoteView AddStickyNote(StickyNote stickyNote)
         {
-            boardControls.Add(stickyNote);
+            var stickyNoteView = new StickyNoteView();
+
+            InitBoardControlView(stickyNoteView, stickyNote);
+
+            AddBoardControlView(stickyNoteView);
+
+            SetTopBoardControlView(stickyNoteView);
+
+            return stickyNoteView;
         }
 
-        public Point GetChildPosition(Control control)
+        private void InitBoardControlView(IBoardControlView boardControlView, BoardControl boardControl)
         {
-            return new Point(Canvas.GetLeft(control), Canvas.GetTop(control));
+            Canvas.SetLeft(boardControlView.Control, boardControl.Position.X);
+            Canvas.SetTop(boardControlView.Control, boardControl.Position.Y);
+            boardControlView.Control.Width = boardControl.Size.Width;
+            boardControlView.Control.Height = boardControl.Size.Height;
+
+            boardControlView.Init(this, boardControl);
         }
 
-        public void MoveChildTo(Control control, Point position)
+        public void AddBoardControlView(IBoardControlView boardControlView)
         {
-            Canvas.SetLeft(control, position.X);
-            Canvas.SetTop(control, position.Y);
+            board.AddBoardControl(boardControlView.BoardControl);
+
+            mainCanvas.Children.Add(boardControlView.Control);
+
+            boardControlViews.Add(boardControlView);
         }
 
-        public void SetTopChild(Control control)
+        public Point GetBoardControlViewPosition(IBoardControlView boardControlView)
         {
-            var index = 0;
-            for (var i = 0; i < mainCanvas.Children.Count; i++)
+            return new Point(Canvas.GetLeft(boardControlView.Control), Canvas.GetTop(boardControlView.Control));
+        }
+
+        public void MoveBoardControlView(IBoardControlView boardControlView, Point position)
+        {
+            Canvas.SetLeft(boardControlView.Control, position.X);
+            Canvas.SetTop(boardControlView.Control, position.Y);
+        }
+
+        public void SetTopBoardControlView(IBoardControlView boardControlView)
+        {
+            var maxZIndex = boardControlViews.Where(x => x != boardControlView).Aggregate(0, (acc, bc) => Math.Max(acc, Canvas.GetZIndex(bc.Control)));
+
+            Canvas.SetZIndex(boardControlView.Control, maxZIndex + 1);
+            Canvas.SetZIndex(selectedControlTools, maxZIndex + 2);
+        }
+
+        public void RemoveBoardControlView(IBoardControlView boardControlView)
+        {
+            if (boardControlView == selectedControlView)
             {
-                var child = mainCanvas.Children[i];
-
-                if (child != control)
-                {
-                    Canvas.SetZIndex(child, index++);
-                }
+                SelectedBoardControlView = null;
             }
 
-            Canvas.SetZIndex(control, index);
-        }
+            boardControlView.StopEdit();
+            boardControlViews.Remove(boardControlView);
+            mainCanvas.Children.Remove(boardControlView.Control);
 
-        public void RemoveControl(IBoardControlView boardControl)
-        {
-            if (boardControl == selectedControl)
-            {
-                SelectedControl = null;
-            }
-
-            boardControl.StopEdit();
-            boardControls.Remove(boardControl);
-            mainCanvas.Children.Remove((Control)boardControl);
+            board.RemoveBoardControl(boardControlView.BoardControl);
         }
 
         public void StopAllEdits()
         {
-            boardControls.ForEach(x => x.StopEdit());
+            boardControlViews.ForEach(x => x.StopEdit());
         }
         
         private void Board_Tapped(object sender, TappedRoutedEventArgs e)
         {
             StopAllEdits();
-            SelectedControl = null;
+            SelectedBoardControlView = null;
         }
 
         private void Board_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)

@@ -16,9 +16,9 @@
     ManipulationStarted="StickyNote_ManipulationStarted">
 
     <Border BorderBrush="Black" BorderThickness="2">
-        <Canvas Background="Yellow" Width="300" Height="300">
-            <TextBox x:Name="textBox" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Stretch" Margin="0,0,0,0" Text="Sticky Note" VerticalAlignment="Stretch" FontSize="22" BorderBrush="{x:Null}" InputScope="Text" Background="{x:Null}" LostFocus="TextBox_LostFocus" Padding="0,0,0,0" Width="300" Height="300"/>
-            <TextBlock x:Name="textBlock" TextWrapping="Wrap" HorizontalAlignment="Stretch" Margin="0,0,0,0" Text="Sticky Note" VerticalAlignment="Stretch" FontSize="22" Padding="2,1,0,0" Width="300" Height="300"/>
-        </Canvas>
+        <Grid Background="Yellow">
+            <TextBox x:Name="textBox" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Stretch" Margin="0,0,0,0" Text="Sticky Note" VerticalAlignment="Stretch" FontSize="22" BorderBrush="{x:Null}" InputScope="Text" Background="{x:Null}" LostFocus="TextBox_LostFocus" Padding="0,0,0,0"/>
+            <TextBlock x:Name="textBlock" TextWrapping="Wrap" HorizontalAlignment="Stretch" Margin="0,0,0,0" Text="Sticky Note" VerticalAlignment="Stretch" FontSize="22" Padding="2,1,0,0"/>
+        </Grid>
     </Border>
 </UserControl>
