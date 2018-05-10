@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
 
-namespace SharedBoard.Controls
+namespace SharedBoard.View
 {
-    public interface IBoardControl
+    public interface IBoardControlView
     {
         void StopEdit();
 

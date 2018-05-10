@@ -1,4 +1,4 @@
-﻿using SharedBoard.Controls;
+﻿using SharedBoard.View;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,7 +41,7 @@ namespace SharedBoard
         {
             var scrollCenter = board.VisibleCenter;
             
-            board.AddStickyNote(new Point(scrollCenter.X - StickyNote.DefaultSize.Width / 2, scrollCenter.Y - StickyNote.DefaultSize.Height / 2)).StartEdit(true);
+            board.AddStickyNote(new Point(scrollCenter.X - StickyNoteView.DefaultSize.Width / 2, scrollCenter.Y - StickyNoteView.DefaultSize.Height / 2)).StartEdit(true);
         }
 
         private void ZoomIn_Click(object sender, RoutedEventArgs e)

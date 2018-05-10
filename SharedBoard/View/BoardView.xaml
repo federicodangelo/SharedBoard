@@ -1,8 +1,8 @@
 ﻿<UserControl
-    x:Class="SharedBoard.Controls.Board"
+    x:Class="SharedBoard.View.BoardView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:SharedBoard.Controls"
+    xmlns:local="using:SharedBoard.View"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -12,6 +12,6 @@
     Tapped="Board_Tapped"
     >
     <Canvas Background="#FFD4F7F5" x:Name="mainCanvas">
-        <local:SelectedControlTools Visibility="Collapsed" x:Name="selectedControlTools"/>
+        <local:SelectedControlToolsView Visibility="Collapsed" x:Name="selectedControlTools"/>
     </Canvas>
 </UserControl>

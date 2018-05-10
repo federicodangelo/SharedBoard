@@ -15,24 +15,24 @@ using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
-namespace SharedBoard.Controls
+namespace SharedBoard.View
 {
-    public sealed partial class SelectedControlTools : UserControl
+    public sealed partial class SelectedControlToolsView : UserControl
     {
-        private Board board;
-        private IBoardControl boardControl;
+        private BoardView board;
+        private IBoardControlView boardControl;
         private Control control;
         private long topPropertyChangedToken;
         private long leftPropertyChangedToken;
 
-        public Board Board { set => board = value; }
+        public BoardView Board { set => board = value; }
 
-        public SelectedControlTools()
+        public SelectedControlToolsView()
         {
             this.InitializeComponent();
         }
 
-        public void Show(IBoardControl boardControl, Control control)
+        public void Show(IBoardControlView boardControl, Control control)
         {
             Hide();
 

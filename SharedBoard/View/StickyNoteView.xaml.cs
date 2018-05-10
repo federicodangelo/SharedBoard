@@ -15,17 +15,17 @@ using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
-namespace SharedBoard.Controls
+namespace SharedBoard.View
 {
-    public sealed partial class StickyNote : UserControl, IBoardControl
+    public sealed partial class StickyNoteView : UserControl, IBoardControlView
     {
         public static readonly Size DefaultSize = new Size(300, 300);
 
-        private Board board;
+        private BoardView board;
 
         private bool selected;
 
-        public Board Board { get => board; set => board = value; }
+        public BoardView Board { get => board; set => board = value; }
 
         public Rect Bounds
         {
@@ -52,7 +52,7 @@ namespace SharedBoard.Controls
             }
         }
 
-        public StickyNote()
+        public StickyNoteView()
         {
             this.InitializeComponent();
 

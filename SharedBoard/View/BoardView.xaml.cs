@@ -15,15 +15,15 @@ using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
-namespace SharedBoard.Controls
+namespace SharedBoard.View
 {
-    public sealed partial class Board : UserControl
+    public sealed partial class BoardView : UserControl
     {
         private ScrollViewer scrollViewer;
 
-        private IBoardControl selectedControl;
+        private IBoardControlView selectedControl;
 
-        private readonly List<IBoardControl> boardControls = new List<IBoardControl>();
+        private readonly List<IBoardControlView> boardControls = new List<IBoardControlView>();
 
         public Rect Bounds => new Rect(0, 0, ActualWidth, ActualHeight);
 
@@ -42,7 +42,7 @@ namespace SharedBoard.Controls
             }
         }
 
-        public IBoardControl SelectedControl
+        public IBoardControlView SelectedControl
         {
             get
             {
@@ -71,15 +71,15 @@ namespace SharedBoard.Controls
             }
         }
 
-        public Board()
+        public BoardView()
         {
             this.InitializeComponent();
             selectedControlTools.Board = this;
         }
 
-        public StickyNote AddStickyNote(Point position)
+        public StickyNoteView AddStickyNote(Point position)
         {
-            var stickyNote = new StickyNote
+            var stickyNote = new StickyNoteView
             {
                 Board = this
             };
@@ -96,7 +96,7 @@ namespace SharedBoard.Controls
             return stickyNote;
         }
 
-        private void AddBoardControl(StickyNote stickyNote)
+        private void AddBoardControl(StickyNoteView stickyNote)
         {
             boardControls.Add(stickyNote);
         }
@@ -128,7 +128,7 @@ namespace SharedBoard.Controls
             Canvas.SetZIndex(control, index);
         }
 
-        public void RemoveControl(IBoardControl boardControl)
+        public void RemoveControl(IBoardControlView boardControl)
         {
             if (boardControl == selectedControl)
             {
@@ -154,8 +154,8 @@ namespace SharedBoard.Controls
         private void Board_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
             var pos = e.GetPosition(mainCanvas);
-            pos.X -= StickyNote.DefaultSize.Width / 2;
-            pos.Y -= StickyNote.DefaultSize.Height / 2;
+            pos.X -= StickyNoteView.DefaultSize.Width / 2;
+            pos.Y -= StickyNoteView.DefaultSize.Height / 2;
 
             AddStickyNote(pos).StartEdit(true);
         }
