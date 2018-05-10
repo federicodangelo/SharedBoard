@@ -30,17 +30,7 @@ namespace SharedBoard
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var stickyNote = new StickyNote();
-
-            //stickyNote.Margin = new Thickness(100, 100, Double.NaN, Double.NaN);
-
-            Canvas.SetLeft(stickyNote, 100);
-            Canvas.SetTop(stickyNote, 100);
-
-
-
-
-            mainCanvas.Children.Add(stickyNote);
+            board.AddStickyNote(new Point(100, 100));
         }
     }
 }

@@ -8,7 +8,8 @@
     x:Class="SharedBoard.MainPage"
     mc:Ignorable="d">
 
-    <Canvas x:Name="mainCanvas" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Button Content="Button" HorizontalAlignment="Left" Margin="986,622,0,0" VerticalAlignment="Top" Click="Button_Click"/>
-    </Canvas>
+    <Grid x:Name="mainCanvas" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Custom:Board x:Name="board" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <Button Content="Add Sticky Note" HorizontalAlignment="Right" Margin="0,0,50,50" VerticalAlignment="Bottom" Click="Button_Click" Canvas.Left="1122" Canvas.Top="644"/>
+    </Grid>
 </Page>
