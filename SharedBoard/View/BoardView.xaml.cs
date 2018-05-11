@@ -1,18 +1,29 @@
-﻿using SharedBoard.Model;
+﻿using MetroLog;
+using SharedBoard.Model;
+using SharedBoard.Model.Controls;
 using SharedBoard.View.Controls;
 using SharedBoard.ViewModel;
 using SharedBoard.ViewModel.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
+using Windows.Storage;
+using Windows.Storage.FileProperties;
+using Windows.Storage.Streams;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace SharedBoard.View
 {
     public sealed partial class BoardView : UserControl
     {
+        private ILogger log = LogManagerFactory.DefaultLogManager.GetLogger<BoardView>();
+
         private IBoardControlView selectedControlView;
 
         private readonly List<IBoardControlView> boardControlViews = new List<IBoardControlView>();
@@ -35,7 +46,7 @@ namespace SharedBoard.View
         }
 
         public BoardViewModel ViewModel { get; }
-        
+
         public BoardView()
         {
             this.InitializeComponent();
@@ -44,7 +55,7 @@ namespace SharedBoard.View
 
             InitManualBindings();
         }
-        
+
         public void SetTopBoardControlView(IBoardControlView boardControlView)
         {
             var maxZIndex = boardControlViews.Where(x => x != boardControlView).Aggregate(0, (acc, bc) => Math.Max(acc, Canvas.GetZIndex((Windows.UI.Xaml.UIElement)bc.Control)));
@@ -99,7 +110,7 @@ namespace SharedBoard.View
         {
             return boardControlViews.Find(x => x.BoardControlViewModel == boardControlViewModel);
         }
-        
+
         private IBoardControlView AddBoardControlViewModel(BoardControlViewModel boardControlViewModel)
         {
             var boardControlView = BoardControlViewFactory.BuildBoardControlView(boardControlViewModel.BoardControl);
@@ -162,23 +173,96 @@ namespace SharedBoard.View
                 selectedControlTools.Hide();
             }
         }
-        
+
         private void Board_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            Focus(Windows.UI.Xaml.FocusState.Pointer);
+            Focus(FocusState.Pointer);
             ViewModel.LastPointerPosition = e.GetPosition(mainCanvas);
             ViewModel.SelectedBoardControlViewModel = null;
         }
 
         private void Board_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
-            Focus(Windows.UI.Xaml.FocusState.Pointer);
+            Focus(FocusState.Pointer);
             ViewModel.LastPointerPosition = e.GetPosition(mainCanvas);
         }
 
         private void Board_LayoutUpdated(object sender, object e)
         {
             ViewModel.VisibleCenter = VisibleCenter;
+        }
+
+        private void OnFileDragOver(object sender, DragEventArgs e)
+        {
+            e.AcceptedOperation = DataPackageOperation.Copy;
+
+            if (e.DragUIOverride != null)
+            {
+                e.DragUIOverride.Caption = "Add file";
+                e.DragUIOverride.IsContentVisible = true;
+            }
+
+            //this.AddFilePanel.Visibility = Visibility.Visible;
+        }
+
+        private void OnFileDragLeave(object sender, DragEventArgs e)
+        {
+            //this.AddFilePanel.Visibility = Visibility.Collapsed;
+        }
+
+        private async void OnFileDrop(object sender, DragEventArgs e)
+        {
+            ViewModel.LastPointerPosition = e.GetPosition(mainCanvas);
+
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                var items = await e.DataView.GetStorageItemsAsync();
+                if (items.Count > 0)
+                {
+                    foreach (var file in items.OfType<StorageFile>())// .Select(storageFile => new AppFile { Name = storageFile.Name, File = storageFile }))
+                    {
+                        try
+                        {
+                            if (file.FileType.ToLower() == ".txt")
+                            {
+                                var buffer = await FileIO.ReadBufferAsync(file);
+
+                                using (var reader = DataReader.FromBuffer(buffer))
+                                {
+                                    byte[] fileContent = new byte[reader.UnconsumedBufferLength];
+                                    reader.ReadBytes(fileContent);
+                                    string text = Encoding.UTF8.GetString(fileContent, 0, fileContent.Length);
+
+                                    var stickyNoteViewModel = ViewModel.AddStickyNote(ViewModel.LastPointerPosition) as StickyNoteViewModel;
+
+                                    stickyNoteViewModel.Text = text;
+                                }
+                            }
+                            else if (file.FileType.ToLower() == ".jpg" || file.FileType.ToLower() == ".png")
+                            {
+                                var thumbnail = await file.GetScaledImageAsThumbnailAsync(ThumbnailMode.PicturesView, (uint)BoardImage.DefaultSize.Width);
+
+                                var bitmapImage = new BitmapImage();
+                                await bitmapImage.SetSourceAsync(thumbnail);
+
+                                var boardImageViewModel = ViewModel.AddBoardImage(ViewModel.LastPointerPosition) as BoardImageViewModel;
+
+                                boardImageViewModel.Width = Math.Max(bitmapImage.PixelWidth, 100);
+                                boardImageViewModel.Height = Math.Max(bitmapImage.PixelHeight, 100);
+
+                                boardImageViewModel.Image = bitmapImage;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            log.Error($"Error loading file {file.Name}", ex);
+                        }
+
+                    }
+                }
+            }
+
+            //this.AddFilePanel.Visibility = Visibility.Collapsed;
         }
     }
 }

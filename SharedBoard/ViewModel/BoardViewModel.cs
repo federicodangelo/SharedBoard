@@ -65,7 +65,7 @@ namespace SharedBoard.ViewModel
             BoardControls = new ObservableCollection<BoardControlViewModel>(Board.Controls.Select(x => BoardControlViewModelFactory.BuildBoardControlViewModel(x, this)));
         }
 
-        private BoardControlViewModel AddBoardImage(Point position)
+        public BoardControlViewModel AddBoardImage(Point position)
         {
             var boardImage = new BoardImage
             {
@@ -76,7 +76,7 @@ namespace SharedBoard.ViewModel
             return AddBoardControl(boardImage);
         }
 
-        private BoardControlViewModel AddStickyNote(Point position)
+        public BoardControlViewModel AddStickyNote(Point position)
         {
             var stickyNote = new StickyNote
             {

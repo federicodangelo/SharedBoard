@@ -21,7 +21,7 @@
     <Border BorderBrush="Black" BorderThickness="2">
         <Grid Background="LightGray">
             <TextBox x:Name="textBox" TextWrapping="Wrap" AcceptsReturn="True" HorizontalAlignment="Stretch" Margin="0,0,0,0" Text="{x:Bind BoardImageViewModel.ImageURL, Mode=TwoWay}" VerticalAlignment="Stretch" FontSize="22" BorderBrush="{x:Null}" InputScope="Text" Background="{x:Null}" LostFocus="TextBox_LostFocus" Padding="0,0,0,0"/>
-            <Image x:Name="image" HorizontalAlignment="Stretch" Margin="0,0,0,0" Source="{x:Bind BoardImageViewModel.ImageURL, Mode=OneWay}" VerticalAlignment="Stretch"/>
+            <Image x:Name="image" HorizontalAlignment="Stretch" Margin="0,0,0,0" Source="{x:Bind BoardImageViewModel.FinalImage, Mode=OneWay}" VerticalAlignment="Stretch"/>
         </Grid>
     </Border>
 </UserControl>

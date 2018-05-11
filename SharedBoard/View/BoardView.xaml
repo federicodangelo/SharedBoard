@@ -13,6 +13,10 @@
     Tapped="Board_Tapped"
     DoubleTapped="Board_DoubleTapped"
     LayoutUpdated="Board_LayoutUpdated" 
+    AllowDrop="True" 
+    DragOver="OnFileDragOver" 
+    DragLeave="OnFileDragLeave" 
+    Drop="OnFileDrop"
     >
     
     <interactivity:Interaction.Behaviors>

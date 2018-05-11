@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MetroLog;
+using MetroLog.Targets;
+using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
@@ -20,6 +22,15 @@ namespace SharedBoard
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
+#if DEBUG
+            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, new StreamingFileTarget());
+            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Trace, LogLevel.Fatal, new DebugTarget());
+#else
+            LogManagerFactory.DefaultConfiguration.AddTarget(LogLevel.Error, LogLevel.Fatal, new StreamingFileTarget());
+#endif
+
+            GlobalCrashHandler.Configure();
         }
 
         /// <summary>
