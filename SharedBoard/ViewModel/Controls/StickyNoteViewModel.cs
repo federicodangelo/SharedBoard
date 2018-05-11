@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharedBoard.Model;
+﻿using SharedBoard.Model.Controls;
 
-namespace SharedBoard.ViewModel
+namespace SharedBoard.ViewModel.Controls
 {
     public class StickyNoteViewModel : BoardControlViewModel
     {
-        public StickyNote StickyNote { get; }
+        public StickyNote StickyNote => BoardControl as StickyNote;
 
         public string Text
         {
@@ -19,7 +14,6 @@ namespace SharedBoard.ViewModel
 
         public StickyNoteViewModel(StickyNote stickyNote) : base(stickyNote)
         {
-            this.StickyNote = stickyNote;
         }
     }
 }

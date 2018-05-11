@@ -1,11 +1,9 @@
 ﻿using SharedBoard.Model;
-using SharedBoard.View;
-using System;
-using System.Collections.Generic;
+using SharedBoard.Model.Controls;
+using SharedBoard.ViewModel.Controls;
+using SharedBoard.ViewModel.Utils;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.Foundation;
 
@@ -13,77 +11,42 @@ namespace SharedBoard.ViewModel
 {
     public class BoardViewModel : BindableBase
     {
+        private Point _lastPointerPosition;
+        private Point _visibleCenter;
+        private BoardControlViewModel _selectedBoardControlViewModel;
+
         public Board Board { get; }
 
         public ObservableCollection<BoardControlViewModel> BoardControls { get; }
 
-        public Point LastPointerPosition { get; set; }
-
-        public Point VisibleCenter { get; set; }
-
-        private BoardControlViewModel selectedBoardControlViewModel;
-
-        public BoardViewModel(Board board)
+        public Point LastPointerPosition
         {
-            Board = board;
-            BoardControls = new ObservableCollection<BoardControlViewModel>(Board.Controls.Select(x => BuildBoardControlViewModel(x)));
+            get => _lastPointerPosition;
+            set => SetProperty(ref _lastPointerPosition, value);
         }
 
-        private BoardControlViewModel BuildBoardControlViewModel(BoardControl boardControl)
+        public Point VisibleCenter
         {
-            if (boardControl is StickyNote)
-                return new StickyNoteViewModel(boardControl as StickyNote);
-
-            return new BoardControlViewModel(boardControl);
+            get => _visibleCenter;
+            set => SetProperty(ref _visibleCenter, value);
         }
 
         public BoardControlViewModel SelectedBoardControlViewModel
         {
-            get
-            {
-                return selectedBoardControlViewModel;
-            }
-            set
-            {
-                SetProperty(ref selectedBoardControlViewModel, value);
-            }
+            get => _selectedBoardControlViewModel;
+            set => SetProperty(ref _selectedBoardControlViewModel, value);
         }
 
-        public ICommand CreateAddStickyNoteCommand
-        {
-            get
-            {
-                return new DelegateCommand(() =>
-                    {
-                        SelectedBoardControlViewModel = AddStickyNote(LastPointerPosition);
-                    }
-                );
-            }
-        }
+        public ICommand AddStickyNoteCommand => new DelegateCommand(() => SelectedBoardControlViewModel = AddStickyNote(LastPointerPosition));
 
-        public ICommand CreateAddStickyNoteToVisibleCenterCommand
-        {
-            get
-            {
-                return new DelegateCommand(() =>
-                    {
-                        SelectedBoardControlViewModel = AddStickyNote(VisibleCenter);
-                    }
-                );
-            }
-        }
+        public ICommand AddStickyNoteToVisibleCenterCommand => new DelegateCommand(() => SelectedBoardControlViewModel = AddStickyNote(VisibleCenter));
 
-        public ICommand CreateRemoveSelectedStickyNoteCommand
+        public ICommand RemoveSelectedStickyNoteCommand => new DelegateCommand(() => RemoveBoardControl(SelectedBoardControlViewModel));
+
+        public BoardViewModel(Board board)
         {
-            get
-            {
-                return new DelegateCommand(() =>
-                    {
-                        if (SelectedBoardControlViewModel != null)
-                            RemoveBoardControl(SelectedBoardControlViewModel);
-                    }
-                );
-            }
+            Board = board;
+            BoardControls = new ObservableCollection<BoardControlViewModel>(Board.Controls.Select(BoardControlViewModelFactory.BuildBoardControlViewModel));
         }
 
         private BoardControlViewModel AddStickyNote(Point position)
@@ -99,7 +62,7 @@ namespace SharedBoard.ViewModel
 
         private BoardControlViewModel AddBoardControl(BoardControl boardControl)
         {
-            var boardControlViewModel = BuildBoardControlViewModel(boardControl);
+            var boardControlViewModel = BoardControlViewModelFactory.BuildBoardControlViewModel(boardControl);
 
             Board.AddBoardControl(boardControl);
             BoardControls.Add(boardControlViewModel);

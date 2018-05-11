@@ -1,14 +1,8 @@
-﻿using SharedBoard.Model;
-using SharedBoard.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SharedBoard.ViewModel.Controls;
 using Windows.Foundation;
 using Windows.UI.Xaml.Controls;
 
-namespace SharedBoard.View
+namespace SharedBoard.View.Controls
 {
     public interface IBoardControlView
     {

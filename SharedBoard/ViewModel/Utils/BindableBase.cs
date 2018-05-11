@@ -26,7 +26,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace SharedBoard.ViewModel
+namespace SharedBoard.ViewModel.Utils
 {
     /// <summary>
     /// Implementation of <see cref="INotifyPropertyChanged"/> to simplify models.
@@ -60,7 +60,7 @@ namespace SharedBoard.ViewModel
             return true;
         }
 
-        protected bool SetProperty<T>(T oldValue, T value, Action<T> updater,  [CallerMemberName] String propertyName = null)
+        protected bool SetProperty<T>(T oldValue, T value, Action<T> updater, [CallerMemberName] String propertyName = null)
         {
             if (object.Equals(oldValue, value)) return false;
             updater(value);

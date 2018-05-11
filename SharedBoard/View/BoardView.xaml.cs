@@ -1,52 +1,40 @@
 ﻿using SharedBoard.Model;
+using SharedBoard.View.Controls;
 using SharedBoard.ViewModel;
+using SharedBoard.ViewModel.Controls;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-
-// The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace SharedBoard.View
 {
     public sealed partial class BoardView : UserControl
     {
-        private ScrollViewer scrollViewer;
-
         private IBoardControlView selectedControlView;
-
-        private Board board = new Board();
 
         private readonly List<IBoardControlView> boardControlViews = new List<IBoardControlView>();
 
         public Rect Bounds => new Rect(0, 0, ActualWidth, ActualHeight);
 
-        public ScrollViewer ScrollViewer { get => scrollViewer; set => scrollViewer = value; }
+        public ScrollViewer ScrollViewer { get; set; }
 
-        public float ZoomFactor => scrollViewer.ZoomFactor;
+        public float ZoomFactor => ScrollViewer.ZoomFactor;
 
         public Point VisibleCenter
         {
             get
             {
-                var x = Bounds.Width / 2 + (-scrollViewer.ScrollableWidth / 2 + scrollViewer.HorizontalOffset) / ZoomFactor;
-                var y = Bounds.Height / 2 + (-scrollViewer.ScrollableHeight / 2 + scrollViewer.VerticalOffset) / ZoomFactor;
+                var x = Bounds.Width / 2 + (-ScrollViewer.ScrollableWidth / 2 + ScrollViewer.HorizontalOffset) / ZoomFactor;
+                var y = Bounds.Height / 2 + (-ScrollViewer.ScrollableHeight / 2 + ScrollViewer.VerticalOffset) / ZoomFactor;
 
                 return new Point(x, y);
             }
         }
 
-        public BoardViewModel ViewModel { get; private set; }
+        public BoardViewModel ViewModel { get; }
         
         public BoardView()
         {
@@ -55,6 +43,14 @@ namespace SharedBoard.View
             ViewModel = new BoardViewModel(new Board());
 
             InitManualBindings();
+        }
+        
+        public void SetTopBoardControlView(IBoardControlView boardControlView)
+        {
+            var maxZIndex = boardControlViews.Where(x => x != boardControlView).Aggregate(0, (acc, bc) => Math.Max(acc, Canvas.GetZIndex((Windows.UI.Xaml.UIElement)bc.Control)));
+
+            Canvas.SetZIndex((Windows.UI.Xaml.UIElement)boardControlView.Control, maxZIndex + 1);
+            Canvas.SetZIndex(selectedControlTools, maxZIndex + 2);
         }
 
         private void InitManualBindings()
@@ -80,9 +76,9 @@ namespace SharedBoard.View
             {
                 foreach (var item in e.NewItems)
                 {
-                    if (item is StickyNoteViewModel)
+                    if (item is BoardControlViewModel)
                     {
-                        AddStickyNote(item as StickyNoteViewModel);
+                        AddBoardControlViewModel(item as BoardControlViewModel);
                     }
                 }
             }
@@ -104,17 +100,17 @@ namespace SharedBoard.View
             return boardControlViews.Find(x => x.BoardControlViewModel == boardControlViewModel);
         }
         
-        private StickyNoteView AddStickyNote(StickyNoteViewModel stickyNoteViewModel)
+        private IBoardControlView AddBoardControlViewModel(BoardControlViewModel boardControlViewModel)
         {
-            var stickyNoteView = new StickyNoteView();
+            var boardControlView = BoardControlViewFactory.BuildBoardControlView(boardControlViewModel.BoardControl);
 
-            InitBoardControlView(stickyNoteView, stickyNoteViewModel);
+            InitBoardControlView(boardControlView, boardControlViewModel);
 
-            AddBoardControlView(stickyNoteView);
+            AddBoardControlView(boardControlView);
 
-            SetTopBoardControlView(stickyNoteView);
+            SetTopBoardControlView(boardControlView);
 
-            return stickyNoteView;
+            return boardControlView;
         }
 
         private void InitBoardControlView(IBoardControlView boardControlView, BoardControlViewModel boardControlViewModel)
@@ -124,17 +120,9 @@ namespace SharedBoard.View
 
         private void AddBoardControlView(IBoardControlView boardControlView)
         {
-            mainCanvas.Children.Add(boardControlView.Control);
+            mainCanvas.Children.Add((Windows.UI.Xaml.UIElement)boardControlView.Control);
 
             boardControlViews.Add(boardControlView);
-        }
-
-        public void SetTopBoardControlView(IBoardControlView boardControlView)
-        {
-            var maxZIndex = boardControlViews.Where(x => x != boardControlView).Aggregate(0, (acc, bc) => Math.Max(acc, Canvas.GetZIndex(bc.Control)));
-
-            Canvas.SetZIndex(boardControlView.Control, maxZIndex + 1);
-            Canvas.SetZIndex(selectedControlTools, maxZIndex + 2);
         }
 
         private void RemoveBoardControlView(IBoardControlView boardControlView)
@@ -149,12 +137,7 @@ namespace SharedBoard.View
 
             boardControlView.StopEdit();
             boardControlViews.Remove(boardControlView);
-            mainCanvas.Children.Remove(boardControlView.Control);
-        }
-
-        public void StopAllEdits()
-        {
-            boardControlViews.ForEach(x => x.StopEdit());
+            mainCanvas.Children.Remove((Windows.UI.Xaml.UIElement)boardControlView.Control);
         }
 
         private void SetSelectedBoardControlView(IBoardControlView value)
@@ -171,7 +154,7 @@ namespace SharedBoard.View
             {
                 selectedControlView.Selected = true;
                 selectedControlTools.Show(selectedControlView);
-                var maxZIndex = boardControlViews.Aggregate(0, (acc, bc) => Math.Max(acc, Canvas.GetZIndex(bc.Control)));
+                var maxZIndex = boardControlViews.Aggregate(0, (acc, bc) => Math.Max(acc, Canvas.GetZIndex((Windows.UI.Xaml.UIElement)bc.Control)));
                 Canvas.SetZIndex(selectedControlTools, maxZIndex + 1);
             }
             else
@@ -179,21 +162,18 @@ namespace SharedBoard.View
                 selectedControlTools.Hide();
             }
         }
-
+        
         private void Board_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            StopAllEdits();
+            Focus(Windows.UI.Xaml.FocusState.Pointer);
             ViewModel.LastPointerPosition = e.GetPosition(mainCanvas);
             ViewModel.SelectedBoardControlViewModel = null;
         }
 
         private void Board_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
-            var pos = e.GetPosition(mainCanvas);
-            ViewModel.LastPointerPosition = pos;
-            var cmd = ViewModel.CreateAddStickyNoteCommand;
-            if (cmd.CanExecute(null))
-                cmd.Execute(null);
+            Focus(Windows.UI.Xaml.FocusState.Pointer);
+            ViewModel.LastPointerPosition = e.GetPosition(mainCanvas);
         }
 
         private void Board_LayoutUpdated(object sender, object e)

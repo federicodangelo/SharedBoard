@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace SharedBoard.ViewModel
+namespace SharedBoard.ViewModel.Utils
 {
     public class DelegateCommand : ICommand
     {

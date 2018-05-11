@@ -1,11 +1,7 @@
-﻿using SharedBoard.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SharedBoard.Model.Controls;
+using SharedBoard.ViewModel.Utils;
 
-namespace SharedBoard.ViewModel
+namespace SharedBoard.ViewModel.Controls
 {
     public class BoardControlViewModel : BindableBase
     {
