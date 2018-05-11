@@ -21,16 +21,16 @@ namespace SharedBoard.View
 
         public ScrollViewer ScrollViewer { get; set; }
 
-        public float ZoomFactor => ScrollViewer.ZoomFactor;
+        public float ZoomFactor => (ScrollViewer?.ZoomFactor).GetValueOrDefault(1.0f);
 
         public Point VisibleCenter
         {
             get
             {
-                var x = Bounds.Width / 2 + (-ScrollViewer.ScrollableWidth / 2 + ScrollViewer.HorizontalOffset) / ZoomFactor;
-                var y = Bounds.Height / 2 + (-ScrollViewer.ScrollableHeight / 2 + ScrollViewer.VerticalOffset) / ZoomFactor;
+                var x = Bounds.Width / 2 + (-ScrollViewer?.ScrollableWidth / 2 + ScrollViewer?.HorizontalOffset) / ZoomFactor;
+                var y = Bounds.Height / 2 + (-ScrollViewer?.ScrollableHeight / 2 + ScrollViewer?.VerticalOffset) / ZoomFactor;
 
-                return new Point(x, y);
+                return new Point(x.GetValueOrDefault(), y.GetValueOrDefault());
             }
         }
 

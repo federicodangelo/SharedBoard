@@ -97,10 +97,12 @@
     </Compile>
     <Compile Include="Model\Board.cs" />
     <Compile Include="Model\Controls\BoardControl.cs" />
+    <Compile Include="Model\Controls\BoardImage.cs" />
     <Compile Include="Model\Controls\StickyNote.cs" />
     <Compile Include="ViewModel\Controls\BoardControlViewModel.cs" />
     <Compile Include="ViewModel\BoardViewModel.cs" />
     <Compile Include="ViewModel\Controls\BoardControlViewModelFactory.cs" />
+    <Compile Include="ViewModel\Controls\BoardImageViewModel.cs" />
     <Compile Include="ViewModel\Utils\DelegateCommand.cs" />
     <Compile Include="ViewModel\Utils\BindableBase.cs" />
     <Compile Include="ViewModel\Controls\StickyNoteViewModel.cs" />
@@ -109,6 +111,9 @@
     </Compile>
     <Compile Include="View\Controls\BoardControlViewFactory.cs" />
     <Compile Include="View\Controls\IBoardControlView.cs" />
+    <Compile Include="View\Controls\BoardImageView.xaml.cs">
+      <DependentUpon>BoardImageView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\SelectedControlToolsView.xaml.cs">
       <DependentUpon>SelectedControlToolsView.xaml</DependentUpon>
     </Compile>
@@ -144,6 +149,10 @@
     <Page Include="View\BoardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\BoardImageView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\SelectedControlToolsView.xaml">
       <SubType>Designer</SubType>

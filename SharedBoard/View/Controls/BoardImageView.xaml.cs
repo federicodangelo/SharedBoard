@@ -6,13 +6,13 @@ using Windows.UI.Xaml.Input;
 
 namespace SharedBoard.View.Controls
 {
-    public sealed partial class StickyNoteView : UserControl, IBoardControlView
+    public sealed partial class BoardImageView : UserControl, IBoardControlView
     {
         public BoardView BoardView { get; private set; }
 
         public BoardControlViewModel BoardControlViewModel { get; private set; }
 
-        public StickyNoteViewModel StickyNoteViewModel => BoardControlViewModel as StickyNoteViewModel;
+        public BoardImageViewModel BoardImageViewModel => BoardControlViewModel as BoardImageViewModel;
 
         public Rect VisibleBounds => new Rect(Canvas.GetLeft(this), Canvas.GetTop(this), ActualWidth, ActualHeight);
 
@@ -24,7 +24,7 @@ namespace SharedBoard.View.Controls
 
         public Control Control => this;
 
-        public StickyNoteView()
+        public BoardImageView()
         {
             this.InitializeComponent();
 
@@ -49,7 +49,7 @@ namespace SharedBoard.View.Controls
 
             BoardView.ViewModel.SelectedBoardControlViewModel = BoardControlViewModel;
 
-            textBlock.Visibility = Visibility.Collapsed;
+            image.Visibility = Visibility.Collapsed;
             textBox.Visibility = Visibility.Visible;
             textBox.Focus(FocusState.Pointer);
 
@@ -63,7 +63,7 @@ namespace SharedBoard.View.Controls
                 return;
 
             textBox.Visibility = Visibility.Collapsed;
-            textBlock.Visibility = Visibility.Visible;
+            image.Visibility = Visibility.Visible;
         }
 
         private void Control_Tapped(object sender, TappedRoutedEventArgs e)

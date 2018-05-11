@@ -12,7 +12,7 @@ namespace SharedBoard.ViewModel.Controls
             set => SetProperty(StickyNote.Text, value, (v) => StickyNote.Text = v);
         }
 
-        public StickyNoteViewModel(StickyNote stickyNote) : base(stickyNote)
+        public StickyNoteViewModel(StickyNote boardControl, BoardViewModel boardViewModel) : base(boardControl, boardViewModel)
         {
         }
     }

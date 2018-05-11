@@ -10,6 +10,9 @@ namespace SharedBoard.View.Controls
             if (boardControl is StickyNote)
                 return new StickyNoteView();
 
+            if (boardControl is BoardImage)
+                return new BoardImageView();
+
             throw new Exception($"Unknown board control type {boardControl.GetType().Name}");
         }
     }

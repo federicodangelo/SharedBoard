@@ -23,7 +23,7 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <Button Content="X" Command="{x:Bind Board.ViewModel.RemoveSelectedStickyNoteCommand}" Width="40" Height="40" Grid.Column="0" Margin="5" Tapped="Button_Tapped" DoubleTapped="Button_DoubleTapped" />
+                    <Button Content="X" Command="{x:Bind Board.ViewModel.RemoveSelectedBoardControlCommand}" Width="40" Height="40" Grid.Column="0" Margin="5" Tapped="Button_Tapped" DoubleTapped="Button_DoubleTapped" />
                     <Button Content="..." Command="{x:Bind StartEditSelectedItemCommand}" Width="40" Height="40" Grid.Column="1" Margin="5" Tapped="Button_Tapped" DoubleTapped="Button_DoubleTapped"/>
                 </Grid>
             </Border>

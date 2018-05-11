@@ -18,6 +18,18 @@ namespace SharedBoard.ViewModel
         public Board Board { get; }
 
         public ObservableCollection<BoardControlViewModel> BoardControls { get; }
+        
+        public double Width
+        {
+            get => Board.Width;
+            set => SetProperty(Board.Width, value, (v) => Board.Width = v);
+        }
+
+        public double Height
+        {
+            get => Board.Height;
+            set => SetProperty(Board.Height, value, (v) => Board.Height = v);
+        }
 
         public Point LastPointerPosition
         {
@@ -41,12 +53,27 @@ namespace SharedBoard.ViewModel
 
         public ICommand AddStickyNoteToVisibleCenterCommand => new DelegateCommand(() => SelectedBoardControlViewModel = AddStickyNote(VisibleCenter));
 
-        public ICommand RemoveSelectedStickyNoteCommand => new DelegateCommand(() => RemoveBoardControl(SelectedBoardControlViewModel));
+        public ICommand AddBoardImageCommand => new DelegateCommand(() => SelectedBoardControlViewModel = AddBoardImage(LastPointerPosition));
+
+        public ICommand AddBoardImageToVisibleCenterCommand => new DelegateCommand(() => SelectedBoardControlViewModel = AddBoardImage(VisibleCenter));
+
+        public ICommand RemoveSelectedBoardControlCommand => new DelegateCommand(() => RemoveBoardControl(SelectedBoardControlViewModel));
 
         public BoardViewModel(Board board)
         {
             Board = board;
-            BoardControls = new ObservableCollection<BoardControlViewModel>(Board.Controls.Select(BoardControlViewModelFactory.BuildBoardControlViewModel));
+            BoardControls = new ObservableCollection<BoardControlViewModel>(Board.Controls.Select(x => BoardControlViewModelFactory.BuildBoardControlViewModel(x, this)));
+        }
+
+        private BoardControlViewModel AddBoardImage(Point position)
+        {
+            var boardImage = new BoardImage
+            {
+                Position = new Point(position.X - BoardImage.DefaultSize.Width / 2, position.Y - BoardImage.DefaultSize.Height / 2),
+                Size = BoardImage.DefaultSize
+            };
+
+            return AddBoardControl(boardImage);
         }
 
         private BoardControlViewModel AddStickyNote(Point position)
@@ -62,7 +89,7 @@ namespace SharedBoard.ViewModel
 
         private BoardControlViewModel AddBoardControl(BoardControl boardControl)
         {
-            var boardControlViewModel = BoardControlViewModelFactory.BuildBoardControlViewModel(boardControl);
+            var boardControlViewModel = BoardControlViewModelFactory.BuildBoardControlViewModel(boardControl, this);
 
             Board.AddBoardControl(boardControl);
             BoardControls.Add(boardControlViewModel);

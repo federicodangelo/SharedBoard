@@ -12,7 +12,8 @@
         <ScrollViewer x:Name="scrollViewer" ZoomMode="Enabled" MinZoomFactor="0.1" MaxZoomFactor="1" HorizontalScrollBarVisibility="Visible" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Visible">
             <Custom:BoardView x:Name="board" HorizontalAlignment="Center" VerticalAlignment="Center" Width="9000" Height="6000"/>
         </ScrollViewer>
-        <Button Content="Add Sticky Note" Command="{x:Bind Board.ViewModel.CreateAddStickyNoteToVisibleCenterCommand}"  HorizontalAlignment="Right" Margin="0,0,50,106" VerticalAlignment="Bottom" Canvas.Left="1122" Canvas.Top="644"/>
+        <Button Content="Add Sticky Note" Command="{x:Bind Board.ViewModel.AddStickyNoteToVisibleCenterCommand}"  HorizontalAlignment="Right" Margin="0,0,50,156" VerticalAlignment="Bottom" Canvas.Left="1122" Canvas.Top="644" Width="130"/>
+        <Button Content="Add Image" Command="{x:Bind Board.ViewModel.AddBoardImageToVisibleCenterCommand}"  HorizontalAlignment="Right" Margin="0,0,50,106" VerticalAlignment="Bottom" Canvas.Left="1122" Canvas.Top="644" Width="130"/>
         <Button Content="+" HorizontalAlignment="Right" Margin="0,0,129,50" VerticalAlignment="Bottom" Click="ZoomIn_Click" Width="48"/>
         <Button Content="-" HorizontalAlignment="Right" Margin="0,0,50,50" VerticalAlignment="Bottom" Click="ZoomOut_Click" Width="48"/>
     </Grid>

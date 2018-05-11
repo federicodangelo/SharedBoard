@@ -17,7 +17,7 @@
     
     <interactivity:Interaction.Behaviors>
         <interactions:EventTriggerBehavior EventName="DoubleTapped">
-            <interactions:InvokeCommandAction Command="{x:Bind ViewModel.CreateAddStickyNoteCommand}" />
+            <interactions:InvokeCommandAction Command="{x:Bind ViewModel.AddStickyNoteCommand}" />
         </interactions:EventTriggerBehavior>
     </interactivity:Interaction.Behaviors>
 
